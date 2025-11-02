@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadAssist - Mechanic Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #007AFF;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #007AFF;
+            background: white;
+            color: #007AFF;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #007AFF;
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: #007AFF;
+            color: white;
+        }
+
+        .requests-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .request-id {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #FFA500;
+            color: white;
+        }
+
+        .status-accepted {
+            background: #007AFF;
+            color: white;
+        }
+
+        .status-in-progress {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-completed {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-cancelled {
+            background: #999;
+            color: white;
+        }
+
+        .request-info {
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            width: 120px;
+        }
+
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+
+        .issue-description {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #007AFF;
+        }
+
+        .issue-description h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .issue-description p {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #45a049;
+        }
+
+        .btn-progress {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-progress:hover {
+            background: #0056b3;
+        }
+
+        .btn-complete {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #45a049;
+        }
+
+        .btn-call {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-call:hover {
+            background: #0056b3;
+        }
+
+        .btn-navigate {
+            background: #34C759;
+            color: white;
+        }
+
+        .btn-navigate:hover {
+            background: #2fb350;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007AFF;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Mechanic Dashboard</h1>
+        <p>Manage Service Requests</p>
+    </div>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-pending">0</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-active">0</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-completed">0</div>
+                <div class="stat-label">Completed Today</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterRequests('all')">All Requests</button>
+            <button class="filter-btn" onclick="filterRequests('pending')">Pending</button>
+            <button class="filter-btn" onclick="filterRequests('accepted')">Accepted</button>
+            <button class="filter-btn" onclick="filterRequests('in-progress')">In Progress</button>
+            <button class="filter-btn" onclick="filterRequests('completed')">Completed</button>
+        </div>
+
+        <!-- Requests -->
+        <div id="loading" class="loading">
+            <p>Loading requests...</p>
+        </div>
+
+        <div id="requests" class="requests-container" style="display: none;"></div>
+
+        <div id="empty" class="empty" style="display: none;">
+            <h3>No requests found</h3>
+            <p>New service requests will appear here</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let allRequests = [];
+        let currentFilter = 'all';
+
+        // Load requests on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRequests();
+            // Auto-refresh every 30 seconds
+            setInterval(loadRequests, 30000);
+        });
+
+        async function loadRequests() {
+            try {
+                const response = await fetch(`${API_URL}/service-requests`);
+                allRequests = await response.json();
+                updateStats();
+                displayRequests();
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">Failed to load requests. Make sure backend is running.</p>';
+            }
+        }
+
+        function updateStats() {
+            const pending = allRequests.filter(r => r.status === 'pending').length;
+            const active = allRequests.filter(r => r.status === 'accepted' || r.status === 'in-progress').length;
+            const completedToday = allRequests.filter(r => {
+                if (r.status === 'completed' && r.completedAt) {
+                    const today = new Date().toDateString();
+                    const completedDate = new Date(r.completedAt).toDateString();
+                    return today === completedDate;
+                }
+                return false;
+            }).length;
+
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-active').textContent = active;
+            document.getElementById('stat-completed').textContent = completedToday;
+        }
+
+        function filterRequests(filter) {
+            currentFilter = filter;
+            
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            displayRequests();
+        }
+
+        function displayRequests() {
+            const container = document.getElementById('requests');
+            const loading = document.getElementById('loading');
+            const empty = document.getElementById('empty');
+
+            loading.style.display = 'none';
+
+            let filtered = allRequests;
+            if (currentFilter !== 'all') {
+                filtered = allRequests.filter(r => r.status === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            container.style.display = 'grid';
+
+            container.innerHTML = filtered.map(request => createRequestCard(request)).join('');
+        }
+
+        function createRequestCard(request) {
+            const createdDate = new Date(request.createdAt).toLocaleString();
+            const statusClass = `status-${request.status}`;
+
+            let actionButtons = '';
+
+            if (request.status === 'pending') {
+                actionButtons = `
+                    <button class="btn btn-accept" onclick="updateStatus('${request._id}', 'accepted')">
+                        ✓ Accept Request
+                    </button>
+                `;
+            } else if (request.status === 'accepted') {
+                actionButtons = `
+                    <button class="btn btn-progress" onclick="updateStatus('${request._id}', 'in-progress')">
+                        🔧 Start Work
+                    </button>
+                `;
+            } else if (request.status === 'in-progress') {
+                actionButtons = `
+                    <button class="btn btn-complete" onclick="updateStatus('${request._id}', 'completed')">
+                        ✅ Mark Complete
+                    </button>
+                `;
+            }
+
+            return `
+                <div class="request-card">
+                    <div class="request-header">
+                        <span class="request-id">Request #${request._id.slice(-6)}</span>
+                        <span class="status-badge ${statusClass}">${request.status}</span>
+                    </div>
+
+                    <div class="request-info">
+                        <div class="info-row">
+                            <span class="info-label">Customer:</span>
+                            <span class="info-value">${request.userName}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone:</span>
+                            <span class="info-value">${request.userPhone}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Vehicle:</span>
+                            <span class="info-value">🚗 ${request.vehicleType}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Requested:</span>
+                            <span class="info-value">${createdDate}</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-description">
+                        <h4>Issue Description:</h4>
+                        <p>${request.issueDescription}</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        ${actionButtons}
+                        <button class="btn btn-call" onclick="callCustomer('${request.userPhone}')">
+                            📞 Call
+                        </button>
+                        <button class="btn btn-navigate" onclick="navigate(${request.location.coordinates[1]}, ${request.location.coordinates[0]})">
+                            📍 Navigate
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function updateStatus(requestId, newStatus) {
+            try {
+                const response = await fetch(`${API_URL}/service-requests/${requestId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (response.ok) {
+                    alert(`Request status updated to: ${newStatus}`);
+                    loadRequests();
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Failed to update status');
+            }
+        }
+
+        function callCustomer(phone) {
+            window.open(`tel:${phone}`, '_self');
+        }
+
+        function navigate(lat, lon) {
+            // Open Google Maps with directions
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`, '_blank');
+        }
+    </script>
+</body>
+</html>
